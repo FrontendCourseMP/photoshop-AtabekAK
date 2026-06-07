@@ -6,7 +6,6 @@ import {
 import {
   applyLevels,
   defaultAllLevels,
-  defaultLevel,
   type AllLevels,
   type ChannelKey,
 } from '../core/LevelsProcessor';
@@ -218,7 +217,6 @@ export class LevelsDialog {
       let white = parseInt(this.sliderWhite.value);
       const gamma = parseInt(this.sliderGamma.value) / 10;
 
-      // FIX ЛР3: Жёсткое ограничение пересечения слайдеров
       if (black >= white) {
         if (document.activeElement === this.sliderBlack) {
           black = white - 1;
@@ -230,7 +228,6 @@ export class LevelsDialog {
       }
 
       this.levels[this.currentChannel] = { inBlack: black, inWhite: white, gamma };
-      // FIX ЛР3: Синхронизируем числовые поля сразу
       this.numBlack.value = String(black);
       this.numWhite.value = String(white);
       this.numGamma.value = gamma.toFixed(1);
@@ -249,11 +246,9 @@ export class LevelsDialog {
       white = Math.max(1,   Math.min(255, white));
       gamma = Math.max(0.1, Math.min(9.9, gamma));
 
-      // FIX ЛР3: Жёсткое ограничение пересечения в числовых полях
       if (black >= white) black = white - 1;
 
       this.levels[this.currentChannel] = { inBlack: black, inWhite: white, gamma };
-      // FIX ЛР3: Синхронизируем и слайдеры и числовые поля
       this.sliderBlack.value = String(black);
       this.sliderWhite.value = String(white);
       this.sliderGamma.value = String(Math.round(gamma * 10));
@@ -267,7 +262,6 @@ export class LevelsDialog {
     this.numWhite.addEventListener('change', onNumChange);
     this.numGamma.addEventListener('change', onNumChange);
 
-    // FIX ЛР3: Сброс сбрасывает ВСЕ каналы
     this.dialog.querySelector('#lev-reset')!.addEventListener('click', () => {
       this.levels = defaultAllLevels();
       this.syncUI();
@@ -296,20 +290,6 @@ export class LevelsDialog {
     this.numWhite.value      = String(s.inWhite);
     this.numGamma.value      = s.gamma.toFixed(1);
     this.channelSelect.value = this.currentChannel;
-  }
-
-  private syncNumbers(): void {
-    const s = this.levels[this.currentChannel];
-    this.numBlack.value = String(s.inBlack);
-    this.numWhite.value = String(s.inWhite);
-    this.numGamma.value = s.gamma.toFixed(1);
-  }
-
-  private syncSliders(): void {
-    const s = this.levels[this.currentChannel];
-    this.sliderBlack.value = String(s.inBlack);
-    this.sliderWhite.value = String(s.inWhite);
-    this.sliderGamma.value = String(Math.round(s.gamma * 10));
   }
 
   private redrawHistogram(): void {
