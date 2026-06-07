@@ -13,6 +13,7 @@ export class KernelDialog {
   private previewEnabled = true;
   private isProcessing = false;
   private rafId: number | null = null;
+  // FIX ЛР5: флаг — было ли нажато «Применить»
   private appliedPermanently = false;
 
   private presetSelect!: HTMLSelectElement;
@@ -33,6 +34,7 @@ export class KernelDialog {
     if (!img) { alert('Сначала загрузите изображение'); return; }
     this.originalImageData = img;
     this.previewEnabled = true;
+    // FIX ЛР5: сбрасываем флаг при каждом открытии
     this.appliedPermanently = false;
     this.loadPreset(0);
     this.dialog.showModal();
@@ -87,7 +89,6 @@ export class KernelDialog {
         }
       </style>
 
-      <!-- Заголовок -->
       <div style="padding:12px 16px;border-bottom:1px solid #3e3e3e;font-weight:700;font-size:14px;color:#9cdcfe;display:flex;align-items:center;justify-content:space-between;">
         <span>🔲 Фильтрация (ядро свёртки)</span>
         <label style="font-size:12px;font-weight:400;color:#d4d4d4;display:flex;align-items:center;gap:4px;cursor:pointer;">
@@ -98,23 +99,21 @@ export class KernelDialog {
 
       <div style="padding:14px 16px;display:flex;flex-direction:column;gap:4px;">
 
-        <!-- Преднастройки -->
         <div class="kd-row">
           <span class="kd-label">Преднастройка:</span>
           <select id="kd-preset" style="flex:1;">
             ${KERNEL_PRESETS.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')}
-            <!-- FIX: опция «Пользовательский» — появляется при ручном редактировании ячеек -->
+            <!-- FIX ЛР5: опция Пользовательский при ручном редактировании -->
             <option value="custom" disabled style="color:#9cdcfe;">— Пользовательский —</option>
           </select>
         </div>
 
-        <!-- Сетка ядра 3×3 -->
         <div style="margin-bottom:10px;">
           <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Ядро свёртки 3×3</div>
           <div id="kd-grid" style="display:grid;grid-template-columns:repeat(3,52px);gap:4px;justify-content:start;"></div>
         </div>
 
-        <!-- Каналы — чекбоксы, включая Alpha -->
+        <!-- FIX ЛР5: checkbox вместо radio, включая Alpha -->
         <div class="kd-row" style="flex-wrap:wrap;gap:6px;align-items:center;">
           <span class="kd-label">Каналы:</span>
           <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
@@ -136,7 +135,6 @@ export class KernelDialog {
           ">Все</button>
         </div>
 
-        <!-- Стратегия краёв -->
         <div class="kd-row">
           <span class="kd-label">Заполнение края:</span>
           <select id="kd-edge" style="flex:1;">
@@ -146,7 +144,6 @@ export class KernelDialog {
           </select>
         </div>
 
-        <!-- Прогресс -->
         <div id="kd-progress-wrap" style="display:none;margin-bottom:6px;">
           <div style="font-size:11px;color:#888;margin-bottom:3px;">Обработка... <span id="kd-pct">0%</span></div>
           <div style="background:#3c3c3c;border-radius:2px;overflow:hidden;">
@@ -154,7 +151,6 @@ export class KernelDialog {
           </div>
         </div>
 
-        <!-- Кнопки -->
         <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:8px;border-top:1px solid #3e3e3e;margin-top:4px;">
           <button class="kd-btn kd-btn-secondary" id="kd-reset">Сброс</button>
           <button class="kd-btn kd-btn-secondary" id="kd-cancel">Отмена</button>
@@ -199,12 +195,11 @@ export class KernelDialog {
   private bindEvents(): void {
     this.presetSelect.addEventListener('change', () => {
       const val = this.presetSelect.value;
-      // «custom» — заблокированная опция, пользователь не может её выбрать вручную
       if (val === 'custom') return;
       this.loadPreset(parseInt(val));
     });
 
-    // FIX: при ручном редактировании ячейки переключаем селект на «Пользовательский»
+    // FIX ЛР5: при ручном редактировании ячейки — переключаем на «Пользовательский»
     this.cells.forEach(cell => {
       cell.addEventListener('input', () => {
         this.markAsCustom();
@@ -246,6 +241,7 @@ export class KernelDialog {
       await this.runConvolution(true);
     });
 
+    // FIX ЛР5: Escape восстанавливает оригинал
     this.dialog.addEventListener('cancel', (e) => {
       e.preventDefault();
       if (!this.appliedPermanently) {
@@ -254,6 +250,7 @@ export class KernelDialog {
       this.dialog.close();
     });
 
+    // FIX ЛР5: страховка при любом закрытии без «Применить»
     this.dialog.addEventListener('close', () => {
       if (!this.appliedPermanently && this.originalImageData) {
         this.renderer.render(this.originalImageData);
@@ -262,7 +259,7 @@ export class KernelDialog {
     });
   }
 
-  // FIX: переключаем селект на опцию «custom» при ручном изменении ячеек
+  // FIX ЛР5: переключаем селект на «Пользовательский»
   private markAsCustom(): void {
     this.presetSelect.value = 'custom';
   }
@@ -272,7 +269,6 @@ export class KernelDialog {
     preset.kernel.forEach((v, i) => {
       this.cells[i].value = String(v);
     });
-    // При загрузке пресета — показываем его в селекте (не custom)
     this.presetSelect.value = String(index);
     this.schedulePreview();
   }
@@ -281,10 +277,7 @@ export class KernelDialog {
     const kernel = this.cells.map(c => parseFloat(c.value) || 0);
     const sum = kernel.reduce((a, b) => a + b, 0);
 
-    // FIX: если активен именованный пресет — берём его divisor напрямую,
-    // чтобы не терять авторский делитель (например, Гаусс: divisor=16, sum=16 — совпало,
-    // но Прюитт: divisor=1, sum=0 — без этого делилось бы на 1 случайно).
-    // Если режим «custom» — делитель = сумма (или 1 если сумма 0).
+    // FIX ЛР5: для именованного пресета берём его divisor напрямую
     const presetVal = this.presetSelect.value;
     if (presetVal !== 'custom') {
       const presetIndex = parseInt(presetVal);
@@ -347,6 +340,7 @@ export class KernelDialog {
       this.renderer.render(result);
 
       if (applyPermanently) {
+        // FIX ЛР5: помечаем — Применить нажато, откат не нужен
         this.appliedPermanently = true;
         this.dialog.close();
       }

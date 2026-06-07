@@ -6,7 +6,7 @@ export class CanvasRenderer {
   private originalImageData: ImageData | null = null;
   private currentZoom: number = 1.0;
 
-  // FIX ЛР4: Метод интерполяции для зума — по умолчанию bilinear
+  // FIX ЛР4: метод интерполяции для зума
   private zoomMethod: 'nearest' | 'bilinear' = 'bilinear';
 
   constructor(canvas: HTMLCanvasElement) {
@@ -30,9 +30,7 @@ export class CanvasRenderer {
     const w = Math.round(this.originalImageData.width  * zoom);
     const h = Math.round(this.originalImageData.height * zoom);
 
-    // FIX ЛР4: Используем собственную реализацию масштабирования (nearest/bilinear)
-    // вместо браузерного ctx.drawImage, чтобы интерполяция работала корректно
-    // и не перебивалась CSS image-rendering: pixelated
+    // FIX ЛР4: собственная интерполяция вместо ctx.drawImage
     const scaled = scaleImage(this.originalImageData, w, h, this.zoomMethod);
 
     this.canvas.width  = w;

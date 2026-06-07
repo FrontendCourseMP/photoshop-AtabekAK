@@ -14,8 +14,7 @@ export class ChannelsPanel {
   private panel: HTMLElement;
   private originalImageData: ImageData | null = null;
   private channelDefs: ChannelDef[] = [];
-  // FIX ЛР2: флаг — является ли изображение grayscale.
-  // Для grayscale кнопка 'R' (Gray) управляет сразу R+G+B одновременно.
+  // FIX ЛР2: флаг grayscale — Gray управляет R+G+B одновременно
   private isGrayscale: boolean = false;
 
   constructor(renderer: CanvasRenderer) {
@@ -81,7 +80,7 @@ export class ChannelsPanel {
       if (hasAlpha && !isGray) break;
     }
 
-    // FIX ЛР2: запоминаем флаг grayscale для использования в toggleChannel
+    // FIX ЛР2: запоминаем флаг для toggleChannel
     this.isGrayscale = isGray;
 
     if (isGray && !hasAlpha) {
@@ -193,8 +192,7 @@ export class ChannelsPanel {
     this.enabled[channel] = !this.enabled[channel];
     const on = this.enabled[channel];
 
-    // FIX ЛР2: для grayscale-изображений кнопка 'R' (Gray) управляет сразу
-    // R, G и B — иначе при выключении только R серый превращается в сине-зелёный.
+    // FIX ЛР2: для grayscale переключаем R+G+B вместе
     if (this.isGrayscale && channel === 'R') {
       this.enabled.G = on;
       this.enabled.B = on;

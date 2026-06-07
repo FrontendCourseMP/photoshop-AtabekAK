@@ -1,7 +1,6 @@
 export type EdgeStrategy = 'black' | 'white' | 'copy';
 
-// FIX ЛР5: KernelChannel теперь — набор индексов каналов (0=R,1=G,2=B,3=A),
-// а не одиночная строка. Старый тип 'all'|'R'|'G'|'B' заменён на Set<number>.
+// FIX ЛР5: Set<number> вместо строкового типа (0=R,1=G,2=B,3=A)
 export type KernelChannelSet = Set<number>;
 
 export interface KernelPreset {
@@ -43,7 +42,6 @@ export const KERNEL_PRESETS: KernelPreset[] = [
   },
 ];
 
-// Подготовка границ (отступов)
 export function padImage(src: ImageData, strategy: EdgeStrategy): ImageData {
   const w = src.width + 2;
   const h = src.height + 2;
@@ -51,7 +49,6 @@ export function padImage(src: ImageData, strategy: EdgeStrategy): ImageData {
   const d = out.data;
   const s = src.data;
 
-  // Фон по-умолчанию (сплошная заливка краев черным или белым)
   if (strategy === 'white') {
     for (let i = 0; i < d.length; i += 4) {
       d[i] = 255; d[i+1] = 255; d[i+2] = 255; d[i+3] = 255;
@@ -62,7 +59,6 @@ export function padImage(src: ImageData, strategy: EdgeStrategy): ImageData {
     }
   }
 
-  // Копируем сам оригинал прямо в центр, отступив на 1 px
   for (let y = 0; y < src.height; y++) {
     for (let x = 0; x < src.width; x++) {
       const si = (y * src.width + x) * 4;
@@ -74,13 +70,12 @@ export function padImage(src: ImageData, strategy: EdgeStrategy): ImageData {
     }
   }
 
-  // Заполняем пустоты "ближайшим краем" по заданию (copy strategy)
   if (strategy === 'copy') {
     for (let x = 0; x < src.width; x++) {
-      const topSrc    = (0 * src.width + x) * 4;
-      const botSrc    = ((src.height-1) * src.width + x) * 4;
-      const topDst    = (0 * w + (x+1)) * 4;
-      const botDst    = ((h-1) * w + (x+1)) * 4;
+      const topSrc = (0 * src.width + x) * 4;
+      const botSrc = ((src.height-1) * src.width + x) * 4;
+      const topDst = (0 * w + (x+1)) * 4;
+      const botDst = ((h-1) * w + (x+1)) * 4;
       for (let c = 0; c < 4; c++) {
         d[topDst+c] = s[topSrc+c];
         d[botDst+c] = s[botSrc+c];
@@ -112,7 +107,7 @@ export function padImage(src: ImageData, strategy: EdgeStrategy): ImageData {
   return out;
 }
 
-// FIX ЛР5: Применение матрицы с поддержкой произвольного набора каналов (включая Alpha)
+// FIX ЛР5: поддержка произвольного набора каналов включая Alpha
 export async function applyConvolutionAsync(
   src: ImageData,
   kernel: number[],
@@ -129,13 +124,10 @@ export async function applyConvolutionAsync(
   );
 
   const pw = padded.width;
-  const CHUNK = 80; // Размер одного такта расчета строк
+  const CHUNK = 80;
 
-  // Валидация нулевого делителя
   if (divisor === 0) divisor = 1;
 
-  // FIX ЛР5: Определяем к каким каналам (0..3 = R,G,B,A) применять свёртку
-  // Если набор пустой — ничего не делаем
   const channelIndices = [0, 1, 2, 3].filter(c => channels.has(c));
 
   for (let y = 0; y < src.height; y++) {
@@ -144,7 +136,6 @@ export async function applyConvolutionAsync(
 
       for (const c of channelIndices) {
         let sum = 0;
-        // Окно 3х3
         for (let ky = 0; ky < 3; ky++) {
           for (let kx = 0; kx < 3; kx++) {
             const px = (y + ky) * pw + (x + kx);
@@ -155,7 +146,6 @@ export async function applyConvolutionAsync(
       }
     }
 
-    // Если достигнут ЧАНК (сброс в поток, защита от заморозки страницы)
     if (y % CHUNK === 0) {
       if (onProgress) onProgress(Math.round((y / src.height) * 100));
       await new Promise(resolve => setTimeout(resolve, 0));

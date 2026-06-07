@@ -218,9 +218,8 @@ export class LevelsDialog {
       let white = parseInt(this.sliderWhite.value);
       const gamma = parseInt(this.sliderGamma.value) / 10;
 
-      // FIX ЛР3: Жёсткое ограничение пересечения слайдеров с обновлением обоих слайдеров и числовых полей
+      // FIX ЛР3: Жёсткое ограничение пересечения слайдеров
       if (black >= white) {
-        // Определяем какой слайдер только что двигали — ограничиваем его
         if (document.activeElement === this.sliderBlack) {
           black = white - 1;
           this.sliderBlack.value = String(black);
@@ -231,7 +230,7 @@ export class LevelsDialog {
       }
 
       this.levels[this.currentChannel] = { inBlack: black, inWhite: white, gamma };
-      // FIX ЛР3: Синхронизируем числовые поля сразу после изменения слайдеров
+      // FIX ЛР3: Синхронизируем числовые поля сразу
       this.numBlack.value = String(black);
       this.numWhite.value = String(white);
       this.numGamma.value = gamma.toFixed(1);
@@ -254,7 +253,7 @@ export class LevelsDialog {
       if (black >= white) black = white - 1;
 
       this.levels[this.currentChannel] = { inBlack: black, inWhite: white, gamma };
-      // FIX ЛР3: Синхронизируем слайдеры И числовые поля (чтобы не было рассинхрона)
+      // FIX ЛР3: Синхронизируем и слайдеры и числовые поля
       this.sliderBlack.value = String(black);
       this.sliderWhite.value = String(white);
       this.sliderGamma.value = String(Math.round(gamma * 10));
@@ -268,7 +267,7 @@ export class LevelsDialog {
     this.numWhite.addEventListener('change', onNumChange);
     this.numGamma.addEventListener('change', onNumChange);
 
-    // FIX ЛР3: Сброс теперь сбрасывает ВСЕ каналы, а не только текущий
+    // FIX ЛР3: Сброс сбрасывает ВСЕ каналы
     this.dialog.querySelector('#lev-reset')!.addEventListener('click', () => {
       this.levels = defaultAllLevels();
       this.syncUI();

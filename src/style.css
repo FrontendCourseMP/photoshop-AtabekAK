@@ -73,8 +73,8 @@ body {
 
 #main-canvas {
   display: block;
-  /* FIX ЛР4: убрали image-rendering: pixelated — он перебивал билинейную интерполяцию.
-     Теперь масштабирование делается собственным scaleImage в CanvasRenderer */
+  /* FIX ЛР4: убран image-rendering: pixelated —
+     перебивал билинейную интерполяцию */
   cursor: crosshair;
 }
 

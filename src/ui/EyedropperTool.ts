@@ -95,9 +95,7 @@ export class EyedropperTool {
     const b = imageData.data[idx + 2];
     const a = imageData.data[idx + 3];
 
-    // FIX ЛР2: Если пиксель полностью прозрачный (alpha=0) — показываем это явно.
-    // Пипетка читает из originalImageData (оригинал), поэтому нужно вручную
-    // учесть alpha: прозрачный пиксель не имеет «настоящего» цвета на экране.
+    // FIX ЛР2: прозрачный пиксель показываем явно
     const isTransparent = a === 0;
 
     const [L, la, lb] = isTransparent ? [0, 0, 0] : rgbToLab(r, g, b);
@@ -105,7 +103,6 @@ export class EyedropperTool {
       ? '#------'
       : `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
 
-    // Цветовой квадрат показывает реальный цвет с учётом прозрачности
     (document.getElementById('color-preview') as HTMLElement).style.background =
       isTransparent ? 'transparent' : `rgb(${r},${g},${b})`;
 

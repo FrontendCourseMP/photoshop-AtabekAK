@@ -1,7 +1,7 @@
 export interface LevelSettings {
-  inBlack: number;   // 0–255
-  inWhite: number;   // 0–255
-  gamma: number;     // 0.1–9.9
+  inBlack: number;
+  inWhite: number;
+  gamma: number;
 }
 
 export type ChannelKey = 'master' | 'R' | 'G' | 'B' | 'A';
@@ -22,22 +22,17 @@ export function defaultAllLevels(): AllLevels {
   };
 }
 
-// Строим LUT (Look-Up Table) для одного канала
 function buildLUT(settings: LevelSettings): Uint8Array {
   const lut = new Uint8Array(256);
   const { inBlack, inWhite, gamma } = settings;
   const range = inWhite - inBlack || 1;
 
   for (let i = 0; i < 256; i++) {
-    // Нормализуем вход в [0, 1] относительно black/white точек
     let v = (i - inBlack) / range;
     v = Math.max(0, Math.min(1, v));
-
-    // Гамма-коррекция
     if (gamma !== 1.0) {
       v = Math.pow(v, 1.0 / gamma);
     }
-
     lut[i] = Math.round(v * 255);
   }
 
@@ -54,7 +49,6 @@ export function applyLevels(
     src.height
   );
 
-  // Строим LUT для каждого канала
   const lutR = buildLUT(levels.R);
   const lutG = buildLUT(levels.G);
   const lutB = buildLUT(levels.B);
@@ -69,14 +63,12 @@ export function applyLevels(
   const data = out.data;
 
   for (let i = 0; i < data.length; i += 4) {
-    // FIX ЛР3: Master применяется ТОЛЬКО к RGB-каналам (0,1,2), НЕ к Alpha (3)
     const r0 = isMasterDefault ? data[i]     : lutM[data[i]];
     const g0 = isMasterDefault ? data[i + 1] : lutM[data[i + 1]];
     const b0 = isMasterDefault ? data[i + 2] : lutM[data[i + 2]];
-    // Alpha-канал master НЕ трогает — берём как есть
+    // FIX ЛР3: Alpha-канал master НЕ трогает
     const a0 = data[i + 3];
 
-    // Затем применяем отдельные каналы
     data[i]     = lutR[r0];
     data[i + 1] = lutG[g0];
     data[i + 2] = lutB[b0];

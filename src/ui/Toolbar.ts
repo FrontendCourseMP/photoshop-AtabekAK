@@ -24,8 +24,7 @@ export class Toolbar {
       .addEventListener('click', () => this.saveGB7());
   }
 
-  // FIX ЛР1: Создаём offscreen canvas точно в размере исходного ImageData,
-  // без учёта текущего зума — чтобы сохранялось в реальном размере изображения
+  // FIX ЛР1: offscreen canvas в исходном размере из originalImageData
   private createCanvasFromImageData(): HTMLCanvasElement | null {
     const imageData = this.renderer.getImageData();
     if (!imageData) return null;
@@ -41,7 +40,7 @@ export class Toolbar {
     const imageData = this.renderer.getImageData();
     if (!imageData) return;
 
-    // FIX ЛР1: Сохраняем из offscreen canvas в исходном размере, а не из main canvas
+    // FIX ЛР1: сохраняем из offscreen canvas в исходном размере
     const offscreen = this.createCanvasFromImageData()!;
     offscreen.toBlob((blob) => {
       if (blob) this.download(blob, `${this.currentFileName}.png`);
@@ -52,7 +51,7 @@ export class Toolbar {
     const imageData = this.renderer.getImageData();
     if (!imageData) return;
 
-    // FIX ЛР1: Сохраняем из offscreen canvas в исходном размере, а не из main canvas
+    // FIX ЛР1: сохраняем из offscreen canvas в исходном размере
     const offscreen = this.createCanvasFromImageData()!;
     offscreen.toBlob((blob) => {
       if (blob) this.download(blob, `${this.currentFileName}.jpg`);
