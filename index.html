@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhotoShop Mini</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+
+      <!-- Toolbar -->
+      <div id="toolbar">
+        <button class="toolbar-btn" id="btn-open">📂 Open</button>
+        <div style="width:1px; background:#555; height:20px; margin:0 4px;"></div>
+        
+        <button class="toolbar-btn" id="btn-save-png">💾 PNG</button>
+        <button class="toolbar-btn" id="btn-save-jpg">💾 JPG</button>
+        <button class="toolbar-btn" id="btn-save-gb7">💾 GB7</button>
+        <div style="width:1px; background:#555; height:20px; margin:0 4px;"></div>
+        
+        <button class="toolbar-btn" id="btn-levels">📊 Уровни</button>
+        
+        <button class="toolbar-btn" id="btn-resize">📐 Размер</button>
+        
+        <!-- Кнопка 5 лабораторной работы -->
+        <button class="toolbar-btn" id="btn-kernel">🔲 Фильтры</button>
+        
+        <div style="width:1px; background:#555; height:20px; margin:0 4px;"></div>
+        
+        <button class="toolbar-btn" id="btn-eyedropper" title="Пипетка">🎨 Пипетка</button>
+        
+        <input type="file" id="file-input" accept=".png,.jpg,.jpeg,.gb7" style="display:none" />
+      </div>
+
+      <!-- Canvas Area -->
+      <div id="canvas-area">
+        <p class="canvas-placeholder" id="placeholder">
+          📁 Перетащи изображение сюда или нажми Open<br/>
+          <span style="font-size:13px; opacity:0.6">Поддерживаются PNG, JPG, GB7</span>
+        </p>
+        <canvas id="main-canvas" style="display:none"></canvas>
+      </div>
+
+      <!-- Status Bar -->
+      <div id="status-bar">
+        <span class="status-item">
+          <span class="status-label">Ширина:</span>
+          <span class="status-value" id="status-width">—</span>
+        </span>
+        <span class="status-item">
+          <span class="status-label">Высота:</span>
+          <span class="status-value" id="status-height">—</span>
+        </span>
+        <span class="status-item">
+          <span class="status-label">Глубина цвета:</span>
+          <span class="status-value" id="status-depth">—</span>
+        </span>
+        <span class="status-item">
+          <span class="status-label">Формат:</span>
+          <span class="status-value" id="status-format">—</span>
+        </span>
+      </div>
+
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
