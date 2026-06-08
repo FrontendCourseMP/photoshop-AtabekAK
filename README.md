@@ -1,7 +1,4 @@
-<img width="1166" height="155" alt="Снимок экрана 2026-06-08 100810" src="https://github.com/user-attachments/assets/84b392bf-6350-41cd-beb6-977754b52ecb" />
-<img width="1086" height="280" alt="Снимок экрана 2026-06-08 100756" src="https://github.com/user-attachments/assets/e97e1187-f0e5-4640-b211-b8b30cc521b8" />
-<img width="1166" height="155" alt="Снимок экрана 2026-06-08 100810" src="https://github.com/user-attachments/assets/f4d8f147-fbfd-4eba-a8f4-262c458ff28e" />
-<img width="1086" height="280" alt="Снимок экрана 2026-06-08 100756" src="https://github.com/user-attachments/assets/85c24be7-29b2-4121-ac5f-233560aabf2d" />
+
 #  Photoshop Mini
 Выполнил работу Абдыкайымов Атабек Кубатбекович 231-322
 
