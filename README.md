@@ -1,3 +1,7 @@
+<img width="1166" height="155" alt="Снимок экрана 2026-06-08 100810" src="https://github.com/user-attachments/assets/84b392bf-6350-41cd-beb6-977754b52ecb" />
+<img width="1086" height="280" alt="Снимок экрана 2026-06-08 100756" src="https://github.com/user-attachments/assets/e97e1187-f0e5-4640-b211-b8b30cc521b8" />
+<img width="1166" height="155" alt="Снимок экрана 2026-06-08 100810" src="https://github.com/user-attachments/assets/f4d8f147-fbfd-4eba-a8f4-262c458ff28e" />
+<img width="1086" height="280" alt="Снимок экрана 2026-06-08 100756" src="https://github.com/user-attachments/assets/85c24be7-29b2-4121-ac5f-233560aabf2d" />
 #  Photoshop Mini
 Выполнил работу Абдыкайымов Атабек Кубатбекович 231-322
 
@@ -18,10 +22,14 @@ https://stalwart-squirrel-b1a092.netlify.app/
 вместо клонирования репозитория через `git clone` был скачан ZIP-архив.
 ZIP-архив не содержит историю Git (.git папку), только файлы проекта.
  <img width="1623" height="768" alt="Снимок экрана 2026-06-07 224304" src="https://github.com/user-attachments/assets/863e8b42-6dcb-49d1-b4b8-96b9912b942c" />
-
 После внесения всех исправлений в файлы был выполнен `git push --force`,
 который перезаписал историю на GitHub локальными файлами без истории.
 В результате старые коммиты были безвозвратно утеряны.
+Какие были до
+ <img width="1086" height="280" alt="Снимок экрана 2026-06-08 100756" src="https://github.com/user-attachments/assets/18276976-ea3c-43b2-8865-7ce4469aaa0e" />
+ И какие комиты после
+ <img width="1166" height="155" alt="Снимок экрана 2026-06-08 100810" src="https://github.com/user-attachments/assets/d227ffa3-ede2-4c97-9291-e694cf550ebe" />
+
 
 **Что было исправлено в рамках багфикса (коммит fix: исправлены все баги ЛР1–ЛР5):**
 
