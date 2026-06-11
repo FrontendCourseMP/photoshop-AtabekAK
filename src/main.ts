@@ -26,7 +26,6 @@ const statusBar     = new StatusBar();
 const toolbar       = new Toolbar(renderer);
 const channelsPanel = new ChannelsPanel(renderer);
 const eyedropper    = new EyedropperTool(renderer);
-const kernelDialog  = new KernelDialog(renderer);
 
 toolbar.bindSaveButtons();
 
@@ -35,6 +34,10 @@ const zoomControl = new ZoomControl((zoom) => {
 });
 
 const levelsDialog = new LevelsDialog(renderer, (appliedImage) => {
+  channelsPanel.setImage(appliedImage);
+});
+
+const kernelDialog = new KernelDialog(renderer, (appliedImage) => {
   channelsPanel.setImage(appliedImage);
 });
 

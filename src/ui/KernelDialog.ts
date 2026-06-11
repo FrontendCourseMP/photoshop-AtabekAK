@@ -13,8 +13,8 @@ export class KernelDialog {
   private previewEnabled = true;
   private isProcessing = false;
   private rafId: number | null = null;
-  // FIX ЛР5: флаг — было ли нажато «Применить»
   private appliedPermanently = false;
+  private onApply: (imageData: ImageData) => void;
 
   private presetSelect!: HTMLSelectElement;
   private cells!: HTMLInputElement[];
@@ -24,8 +24,9 @@ export class KernelDialog {
   private progressWrap!: HTMLElement;
   private applyBtn!: HTMLButtonElement;
 
-  constructor(renderer: CanvasRenderer) {
+  constructor(renderer: CanvasRenderer, onApply: (imageData: ImageData) => void) {
     this.renderer = renderer;
+    this.onApply = onApply;
     this.buildDialog();
   }
 
@@ -34,10 +35,51 @@ export class KernelDialog {
     if (!img) { alert('Сначала загрузите изображение'); return; }
     this.originalImageData = img;
     this.previewEnabled = true;
-    // FIX ЛР5: сбрасываем флаг при каждом открытии
     this.appliedPermanently = false;
+    this.updateChannelOptions(img);
     this.loadPreset(0);
     this.dialog.showModal();
+  }
+
+  private updateChannelOptions(imageData: ImageData): void {
+    const data = imageData.data;
+    let hasAlpha = false;
+    let isGray = true;
+
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 255) hasAlpha = true;
+      if (data[i] !== data[i + 1] || data[i + 1] !== data[i + 2]) isGray = false;
+      if (hasAlpha && !isGray) break;
+    }
+
+    const labelR = this.dialog.querySelector<HTMLElement>('label[data-ch="0"]')!;
+    const labelG = this.dialog.querySelector<HTMLElement>('label[data-ch="1"]')!;
+    const labelB = this.dialog.querySelector<HTMLElement>('label[data-ch="2"]')!;
+    const labelA = this.dialog.querySelector<HTMLElement>('label[data-ch="3"]')!;
+    const cbR    = this.channelCheckboxes['0'];
+    const cbG    = this.channelCheckboxes['1'];
+    const cbB    = this.channelCheckboxes['2'];
+    const cbA    = this.channelCheckboxes['3'];
+
+    if (isGray) {
+      // grayscale: скрываем G и B, R переименовываем в Gray
+      labelR.querySelector('span')!.textContent = 'Gray';
+      labelG.style.display = 'none';
+      labelB.style.display = 'none';
+      cbR.checked = true;
+      cbG.checked = false;
+      cbB.checked = false;
+    } else {
+      labelR.querySelector('span')!.textContent = 'R';
+      labelG.style.display = '';
+      labelB.style.display = '';
+      cbR.checked = true;
+      cbG.checked = true;
+      cbB.checked = true;
+    }
+
+    labelA.style.display = hasAlpha ? '' : 'none';
+    cbA.checked = false;
   }
 
   private buildDialog(): void {
@@ -103,7 +145,6 @@ export class KernelDialog {
           <span class="kd-label">Преднастройка:</span>
           <select id="kd-preset" style="flex:1;">
             ${KERNEL_PRESETS.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')}
-            <!-- FIX ЛР5: опция Пользовательский при ручном редактировании -->
             <option value="custom" disabled style="color:#9cdcfe;">— Пользовательский —</option>
           </select>
         </div>
@@ -113,19 +154,18 @@ export class KernelDialog {
           <div id="kd-grid" style="display:grid;grid-template-columns:repeat(3,52px);gap:4px;justify-content:start;"></div>
         </div>
 
-        <!-- FIX ЛР5: checkbox вместо radio, включая Alpha -->
         <div class="kd-row" style="flex-wrap:wrap;gap:6px;align-items:center;">
           <span class="kd-label">Каналы:</span>
-          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <label data-ch="0" style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
             <input type="checkbox" name="kd-ch" value="0" checked /> <span style="color:#f48771;">R</span>
           </label>
-          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <label data-ch="1" style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
             <input type="checkbox" name="kd-ch" value="1" checked /> <span style="color:#4ec9b0;">G</span>
           </label>
-          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <label data-ch="2" style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
             <input type="checkbox" name="kd-ch" value="2" checked /> <span style="color:#569cd6;">B</span>
           </label>
-          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <label data-ch="3" style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
             <input type="checkbox" name="kd-ch" value="3" /> <span style="color:#888;">A</span>
           </label>
           <button id="kd-ch-all" style="
@@ -199,7 +239,6 @@ export class KernelDialog {
       this.loadPreset(parseInt(val));
     });
 
-    // FIX ЛР5: при ручном редактировании ячейки — переключаем на «Пользовательский»
     this.cells.forEach(cell => {
       cell.addEventListener('input', () => {
         this.markAsCustom();
@@ -212,7 +251,10 @@ export class KernelDialog {
     });
 
     this.dialog.querySelector('#kd-ch-all')!.addEventListener('click', () => {
-      Object.values(this.channelCheckboxes).forEach(cb => { cb.checked = true; });
+      Object.values(this.channelCheckboxes).forEach(cb => {
+        const label = cb.closest('label') as HTMLElement;
+        if (label.style.display !== 'none') cb.checked = true;
+      });
       this.schedulePreview();
     });
 
@@ -241,7 +283,6 @@ export class KernelDialog {
       await this.runConvolution(true);
     });
 
-    // FIX ЛР5: Escape восстанавливает оригинал
     this.dialog.addEventListener('cancel', (e) => {
       e.preventDefault();
       if (!this.appliedPermanently) {
@@ -250,7 +291,6 @@ export class KernelDialog {
       this.dialog.close();
     });
 
-    // FIX ЛР5: страховка при любом закрытии без «Применить»
     this.dialog.addEventListener('close', () => {
       if (!this.appliedPermanently && this.originalImageData) {
         this.renderer.render(this.originalImageData);
@@ -259,7 +299,6 @@ export class KernelDialog {
     });
   }
 
-  // FIX ЛР5: переключаем селект на «Пользовательский»
   private markAsCustom(): void {
     this.presetSelect.value = 'custom';
   }
@@ -277,7 +316,6 @@ export class KernelDialog {
     const kernel = this.cells.map(c => parseFloat(c.value) || 0);
     const sum = kernel.reduce((a, b) => a + b, 0);
 
-    // FIX ЛР5: для именованного пресета берём его divisor напрямую
     const presetVal = this.presetSelect.value;
     if (presetVal !== 'custom') {
       const presetIndex = parseInt(presetVal);
@@ -340,8 +378,8 @@ export class KernelDialog {
       this.renderer.render(result);
 
       if (applyPermanently) {
-        // FIX ЛР5: помечаем — Применить нажато, откат не нужен
         this.appliedPermanently = true;
+        this.onApply(result);
         this.dialog.close();
       }
     } finally {
