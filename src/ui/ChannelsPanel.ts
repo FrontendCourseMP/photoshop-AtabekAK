@@ -164,9 +164,14 @@ export class ChannelsPanel {
     header.appendChild(name);
     if (isToggleable) header.appendChild(eye);
 
+    // FIX ЛР2: пропорции миниатюры — высота вычисляется из реального соотношения сторон изображения
+    const THUMB_W = 140;
+    const src = this.originalImageData!;
+    const thumbH = Math.round(THUMB_W * (src.height / src.width));
+
     const thumbCanvas = document.createElement('canvas');
-    thumbCanvas.width = 140;
-    thumbCanvas.height = 90;
+    thumbCanvas.width  = THUMB_W;
+    thumbCanvas.height = thumbH;
     thumbCanvas.style.cssText = `
       width: 100%; height: auto;
       border-radius: 3px;

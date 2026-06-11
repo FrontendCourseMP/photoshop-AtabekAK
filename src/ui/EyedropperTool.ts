@@ -29,10 +29,11 @@ export class EyedropperTool {
       padding: 10px 14px;
       font-size: 12px;
       color: #d4d4d4;
-      min-width: 180px;
+      min-width: 200px;
       z-index: 10;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     `;
+    // FIX ЛР2: добавлен явный заголовок секции CIELAB и правильные обозначения L*, a*, b*
     panel.innerHTML = `
       <div style="font-weight:600; margin-bottom:8px; color:#9cdcfe;">🎨 Пипетка</div>
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
@@ -53,10 +54,13 @@ export class EyedropperTool {
         <div><span style="color:#4ec9b0;">G:</span> <span id="ep-g">—</span></div>
         <div><span style="color:#569cd6;">B:</span> <span id="ep-b">—</span></div>
         <div><span style="color:#888;">A:</span> <span id="ep-a">—</span></div>
-        <div style="grid-column:1/-1; margin-top:4px; border-top:1px solid #3e3e3e; padding-top:4px;">
-          <span style="color:#c586c0;">L:</span> <span id="ep-l">—</span>
-          <span style="color:#c586c0; margin-left:8px;">a:</span> <span id="ep-la">—</span>
-          <span style="color:#c586c0; margin-left:8px;">b:</span> <span id="ep-lb">—</span>
+        <div style="grid-column:1/-1; margin-top:6px; border-top:1px solid #3e3e3e; padding-top:6px;">
+          <div style="color:#888; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">CIELAB</div>
+          <div style="display:flex; gap:10px;">
+            <div><span style="color:#c586c0;">L*:</span> <span id="ep-l">—</span></div>
+            <div><span style="color:#c586c0;">a*:</span> <span id="ep-la">—</span></div>
+            <div><span style="color:#c586c0;">b*:</span> <span id="ep-lb">—</span></div>
+          </div>
         </div>
       </div>
     `;
@@ -98,10 +102,13 @@ export class EyedropperTool {
     // FIX ЛР2: прозрачный пиксель показываем явно
     const isTransparent = a === 0;
 
+    // FIX ЛР2: защита от NaN при вычислении LAB
     const [L, la, lb] = isTransparent ? [0, 0, 0] : rgbToLab(r, g, b);
+    const labValid = !isTransparent && !isNaN(L) && !isNaN(la) && !isNaN(lb);
+
     const hex = isTransparent
       ? '#------'
-      : `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+      : `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 
     (document.getElementById('color-preview') as HTMLElement).style.background =
       isTransparent ? 'transparent' : `rgb(${r},${g},${b})`;
@@ -112,9 +119,9 @@ export class EyedropperTool {
     document.getElementById('ep-g')!.textContent      = isTransparent ? '—' : String(g);
     document.getElementById('ep-b')!.textContent      = isTransparent ? '—' : String(b);
     document.getElementById('ep-a')!.textContent      = String(a);
-    document.getElementById('ep-l')!.textContent      = isTransparent ? '—' : L.toFixed(1);
-    document.getElementById('ep-la')!.textContent     = isTransparent ? '—' : la.toFixed(1);
-    document.getElementById('ep-lb')!.textContent     = isTransparent ? '—' : lb.toFixed(1);
+    document.getElementById('ep-l')!.textContent      = labValid ? L.toFixed(1)  : '—';
+    document.getElementById('ep-la')!.textContent     = labValid ? la.toFixed(1) : '—';
+    document.getElementById('ep-lb')!.textContent     = labValid ? lb.toFixed(1) : '—';
 
     this.panel.style.display = 'block';
   }
