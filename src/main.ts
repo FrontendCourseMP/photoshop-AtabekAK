@@ -26,13 +26,16 @@ const statusBar     = new StatusBar();
 const toolbar       = new Toolbar(renderer);
 const channelsPanel = new ChannelsPanel(renderer);
 const eyedropper    = new EyedropperTool(renderer);
-const levelsDialog  = new LevelsDialog(renderer);
 const kernelDialog  = new KernelDialog(renderer);
 
 toolbar.bindSaveButtons();
 
 const zoomControl = new ZoomControl((zoom) => {
   renderer.applyZoom(zoom);
+});
+
+const levelsDialog = new LevelsDialog(renderer, (appliedImage) => {
+  channelsPanel.setImage(appliedImage);
 });
 
 const resizeDialog = new ResizeDialog(renderer, (resizedImage) => {
@@ -60,7 +63,7 @@ async function handleFile(file: File): Promise<void> {
     toolbar.setFileName(file.name);
     channelsPanel.setImage(imageData);
     showImage();
-    
+
     const zoom = ImageScaler.computeFitZoom(
       imageData.width, imageData.height,
       canvasArea.clientWidth - 170, canvasArea.clientHeight, 50

@@ -20,6 +20,7 @@ export class LevelsDialog {
   private currentChannel: ChannelKey = 'master';
   private previewEnabled = true;
   private rafId: number | null = null;
+  private onApply: (imageData: ImageData) => void;
 
   private sliderBlack!: HTMLInputElement;
   private sliderGamma!: HTMLInputElement;
@@ -30,8 +31,9 @@ export class LevelsDialog {
   private logCheckbox!: HTMLInputElement;
   private channelSelect!: HTMLSelectElement;
 
-  constructor(renderer: CanvasRenderer) {
+  constructor(renderer: CanvasRenderer, onApply: (imageData: ImageData) => void) {
     this.renderer = renderer;
+    this.onApply = onApply;
     this.buildDialog();
   }
 
@@ -42,9 +44,41 @@ export class LevelsDialog {
     this.levels = defaultAllLevels();
     this.currentChannel = 'master';
     this.previewEnabled = true;
+    this.updateChannelOptions(img);
     this.syncUI();
     this.redrawHistogram();
     this.dialog.showModal();
+  }
+
+  private updateChannelOptions(imageData: ImageData): void {
+    const data = imageData.data;
+    let hasAlpha = false;
+    let isGray = true;
+
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 255) hasAlpha = true;
+      if (data[i] !== data[i + 1] || data[i + 1] !== data[i + 2]) isGray = false;
+      if (hasAlpha && !isGray) break;
+    }
+
+    const optMaster = this.channelSelect.querySelector<HTMLOptionElement>('option[value="master"]')!;
+    const optR      = this.channelSelect.querySelector<HTMLOptionElement>('option[value="R"]')!;
+    const optG      = this.channelSelect.querySelector<HTMLOptionElement>('option[value="G"]')!;
+    const optB      = this.channelSelect.querySelector<HTMLOptionElement>('option[value="B"]')!;
+    const optA      = this.channelSelect.querySelector<HTMLOptionElement>('option[value="A"]')!;
+
+    if (isGray) {
+      optMaster.textContent = 'Master (Gray)';
+      optR.hidden = true;
+      optG.hidden = true;
+      optB.hidden = true;
+    } else {
+      optMaster.textContent = 'Master (RGB)';
+      optR.hidden = false;
+      optG.hidden = false;
+      optB.hidden = false;
+    }
+    optA.hidden = !hasAlpha;
   }
 
   private buildDialog(): void {
@@ -277,6 +311,7 @@ export class LevelsDialog {
       if (!this.originalImageData) return;
       const result = applyLevels(this.originalImageData, this.levels);
       this.renderer.render(result);
+      this.onApply(result);
       this.dialog.close();
     });
   }
